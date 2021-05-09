@@ -24,4 +24,4 @@ st 8000 gcc
 st 8001 python
 st 8002 openjdk:11
 st 8003 rust
-st 8004 registry.cn-hangzhou.aliyuncs.com/kazune/ojcmp:1.0
+st 8004 registry.cn-hangzhou.aliyuncs.com/kazune/ojcmp:1.1

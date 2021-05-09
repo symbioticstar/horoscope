@@ -20,8 +20,8 @@ export class CommonAdapter {
 
     }
 
-    regist(name: string, adapter: Adapter) {
-        this.adapters.set(name, adapter)
+    regist(adapter: Adapter) {
+        this.adapters.set(adapter.name, adapter)
     }
 
     getAdapter(name: string, throws = true) {
@@ -45,12 +45,21 @@ export class CommonAdapter {
         return JSON.parse(raw)
     }
 
+    // async pushResult(result: AgentResultSet) {
+    //     const adapter = this.adapters.get(result.minimum.from)
+    //     if (!adapter) throw new Error(`Adapter not found for ${result.minimum.id}: ${result.minimum.from}`)
+    //     await adapter.callback(result)
+    //     await this.redisService.do(e => e.lrem(this.txt, 0, result.minimum.id))
+    //     this.logger.log(`Pushed ${result.minimum.id}`)
+    // }
+
+
     async pushResult(result: AgentResultSet) {
         const str = JSON.stringify(result)
-        this.logger.log(`Push ${result.id}`)
+        this.logger.log(`Push ${result.minimum.id}`)
         await this.redisService.do(e => e.lpush(this.rx, str))
-        await this.redisService.do(e => e.lrem(this.txt, 0, result.id))
-        this.logger.log(`Pushed ${result.id}`)
+        await this.redisService.do(e => e.lrem(this.txt, 0, result.minimum.id))
+        this.logger.log(`Pushed ${result.minimum.id}`)
     }
 
     async reloadAll() {

@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { Adapter } from '../adapter'
 import { HoroscopeAgentCallable, HoroscopeAgentCallTemplate, LocalMinimum } from '../types/local.minimum'
-import { AgentResult } from '../types/agent-result'
+import { AgentResultSet } from '../types/agent-result'
 import { RedisService } from '../../redis/redis.service'
 import IORedis from 'ioredis'
 import { ConfigService } from '@nestjs/config'
@@ -13,11 +13,11 @@ import { CommonAdapter } from '../common-adapter'
 @Injectable()
 export class LegacyRedisAdapter implements Adapter, OnModuleInit {
 
+    name = 'legacy'
     private readonly queue: string
     private readonly tmpQueue: string
     private readonly redis: IORedis.Redis
     private readonly logger = new Logger(LegacyRedisAdapter.name)
-
 
     constructor(
         private readonly redisService: RedisService,
@@ -32,7 +32,7 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
         })
         this.queue = this.configService.get<string>('LEV_QUEUE', 'tx')
         this.tmpQueue = this.configService.get<string>('LEV_TMP_QUEUE', 'txt')
-        this.commonAdapter.regist('legacy', this)
+        this.commonAdapter.regist(this)
     }
 
     async onModuleInit() {
@@ -78,6 +78,7 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
         const pipeline: HoroscopeAgentCallable[] = []
 
         minimum.pipeline = pipeline
+        minimum.from = this.name
 
 
         const lang: LanguageDef = languages[submission.language]
@@ -92,6 +93,8 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
             comp.execve_once = false
             pipeline.push(comp)
             pipeline.push({ empty: true, skip_if_fail: false, break_if_fail: 0 })
+        } else {
+            pipeline.push({ empty: true, skip_if_fail: false, break_if_fail: false })
         }
 
         let template = new HoroscopeAgentCallTemplate(lang.runEnv, lang.runArgs)
@@ -125,8 +128,43 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
     }
 
 
-    callback(output: AgentResult[]): Promise<void> | void {
-        return undefined
+    callback(resultSet: AgentResultSet): Promise<void> | void {
+        const res = resultSet.results
+        if (res.length === 0) {
+            // SE
+        }
+        for (const r of res) {
+            if (!r) continue
+            if (r.hsc_err) {
+                // SE
+            }
+        }
+        // SE Complete
+
+
+        if (!res[0]!.ok) {
+            // CE
+        }
+
+        for (let i = 2; i < res.length; i += 2) {
+            const run = res[i]
+            const cmp = res[i + 1]
+
+            if (!run) {
+                // Bad Input
+            } else {
+                if (!run.ok) {
+                    // RE
+                } else {
+                    // Run Ok
+
+                }
+            }
+
+
+        }
+
+
     }
 
 }

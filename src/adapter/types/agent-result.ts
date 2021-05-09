@@ -1,3 +1,5 @@
+import { LocalMinimum } from './local.minimum'
+
 export class AgentResult {
     hsc_err: number = 0
     status: number = 0
@@ -29,13 +31,13 @@ export class AgentResult {
     }
 }
 
-export class AgentResultSet {
-    id: string
-    results: AgentResult[]
+export type AgentResultOptional = AgentResult | undefined
 
-    constructor(id: string, results: AgentResult[]) {
-        this.id = id
-        this.results = results
+export class AgentResultSet {
+    constructor(
+        public minimum: LocalMinimum,
+        public results: AgentResult[],
+    ) {
     }
 }
 

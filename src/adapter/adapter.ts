@@ -1,8 +1,9 @@
-import { LocalMinimum } from './types/local.minimum'
-import { AgentResult } from './types/agent-result'
+import { AgentResultSet } from './types/agent-result'
 
 export interface Adapter<> {
+    name: string
+
     start()
 
-    callback(output: AgentResult[]): Promise<void> | void
+    callback(res: AgentResultSet): Promise<void> | void
 }

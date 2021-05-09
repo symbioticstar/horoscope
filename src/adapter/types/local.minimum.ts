@@ -4,6 +4,7 @@ import { ImageRecord } from '../../images'
 
 export class LocalMinimum {
     id: string
+    from: string
     sourceCode: string
     sourceName: string
     pipeline: HoroscopeAgentCallable[]

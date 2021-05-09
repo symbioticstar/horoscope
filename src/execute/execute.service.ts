@@ -51,7 +51,7 @@ export class ExecuteService implements OnModuleInit {
                 logger.log(`Accept ${minimum.id}`)
                 const results = await this.handleMinimum(minimum, uid)
                 logger.log(`Handled ${minimum.id}`)
-                const resultSet = new AgentResultSet(minimum.id, results)
+                const resultSet = new AgentResultSet(minimum, results)
                 await this.commonAdapter.pushResult(resultSet)
             } catch (e) {
                 logger.error(e)
