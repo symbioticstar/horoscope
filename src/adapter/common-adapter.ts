@@ -45,22 +45,23 @@ export class CommonAdapter {
         return JSON.parse(raw)
     }
 
-    // async pushResult(result: AgentResultSet) {
-    //     const adapter = this.adapters.get(result.minimum.from)
-    //     if (!adapter) throw new Error(`Adapter not found for ${result.minimum.id}: ${result.minimum.from}`)
-    //     await adapter.callback(result)
-    //     await this.redisService.do(e => e.lrem(this.txt, 0, result.minimum.id))
-    //     this.logger.log(`Pushed ${result.minimum.id}`)
-    // }
-
-
     async pushResult(result: AgentResultSet) {
-        const str = JSON.stringify(result)
-        this.logger.log(`Push ${result.minimum.id}`)
-        await this.redisService.do(e => e.lpush(this.rx, str))
+        const adapter = this.adapters.get(result.minimum.from)
+        if (!adapter) throw new Error(`Adapter not found for ${result.minimum.id}: ${result.minimum.from}`)
+        await adapter.callback(result)
         await this.redisService.do(e => e.lrem(this.txt, 0, result.minimum.id))
         this.logger.log(`Pushed ${result.minimum.id}`)
+        await this.logSpeed(result.results.reduce((p, c) => {
+            if (c) p++
+            return p
+        }, 0))
     }
+
+    async logSpeed(cnt) {
+        const sec = (BigInt(Date.now()) / 60000n).toString()
+        await this.redisService.do(e => e.incrby(`spd:${sec}`, cnt))
+    }
+
 
     async reloadAll() {
         while (await this.redisService.do(c => c.rpoplpush(this.txt, this.tx))) {

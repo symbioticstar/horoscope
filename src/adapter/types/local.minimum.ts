@@ -69,15 +69,16 @@ export class HoroscopeAgentCall extends HoroscopeAgentCallTemplate {
     stdin_path: PathClaim
     stdout_path: PathClaim
     stderr_path: PathClaim
-    fd3_path?: PathClaim
-    fd4_path?: PathClaim
+
+    replacements: Record<string, PathClaim>
+
     break_if_fail: number | false
     skip_if_fail: number | false
     empty: boolean
 
 
     make_url(containers: ImageRecord, uid: number, gid: number, src: string, res: string, run: string): string {
-        const { container_name, break_if_fail, skip_if_fail, empty, trusted, ...etc } = this
+        const { container_name, break_if_fail, skip_if_fail, empty, trusted, replacements, ...etc } = this
 
 
         const parse = (key) => {
@@ -94,8 +95,18 @@ export class HoroscopeAgentCall extends HoroscopeAgentCallTemplate {
         parse('stdin_path')
         parse('stdout_path')
         parse('stderr_path')
-        parse('fd3_path')
-        parse('fd4_path')
+
+        if (replacements) {
+            for (const k in replacements) {
+                let val = replacements[k]!
+                if (val && typeof val !== 'string') {
+                    let prefix = ({ src, res, run })[val[0]]
+                    val = path.join(prefix, val[1])
+                }
+                etc.args_str = etc.args_str.replace(k, val)
+            }
+        }
+
 
         const rec = containers[container_name]
         const port = rec && rec[1]

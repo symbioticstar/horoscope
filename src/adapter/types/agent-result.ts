@@ -41,3 +41,9 @@ export class AgentResultSet {
     }
 }
 
+
+export enum Comparison {
+    AC = 100,
+    WA = 101,
+    PE = 102,
+}
