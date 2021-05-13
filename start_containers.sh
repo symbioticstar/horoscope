@@ -6,9 +6,10 @@ function st() {
     -v /hs/run:/hs/run \
     --mount type=bind,source=/root/st/oj,target=/root/st/oj \
     --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \
-    --cap-add SYS_ADMIN \
+    --cap-add ALL \
     -p $1:9000 \
-    -td --restart unless-stopped $2 horoscope_agent
+    -td --restart unless-stopped $2 sh -c 'horoscope_agent'
+    # must use sh -c '...', must not run binary directly
 }
 
 mkdir -p /hs/src /hs/run

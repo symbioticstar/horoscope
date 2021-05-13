@@ -92,8 +92,8 @@ export class ExecuteService implements OnModuleInit {
             }
             await this.callAgent(i, srcPath, runPath, uid, e, results)
         }
-        await remove(srcPath)
-        await remove(runPath)
+        // await remove(srcPath)
+        // await remove(runPath)
         return results
     }
 
@@ -118,6 +118,8 @@ export class ExecuteService implements OnModuleInit {
         console.log(url)
 
         const ret = await got(url, { throwHttpErrors: false })
+
+        console.log({ code: ret.statusCode, body: ret.body })
 
         if (ret.statusCode === 200) {
             const agentRet = ret.body

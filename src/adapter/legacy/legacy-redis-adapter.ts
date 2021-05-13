@@ -137,7 +137,7 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
             const output = path.join(submission.prefix, submission.logicId, `${i}.out`)
 
 
-            const run = template.make_call(['res', input], ['src', `${i}.ans`], '/dev/null')
+            const run = template.make_call(['res', input], ['run', `${i}.ans`], '/dev/null')
             run.lifetime = timeLimit + 1
             run.max_mem = memoryLimit
             pipeline.push(run)
@@ -145,7 +145,7 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
             let cmp = comparer.make_call('/dev/null', '/dev/null', '/dev/null', false, pipeline.length - 1)
             cmp.replacements = {
                 '@standard': ['res', output],
-                '@user': ['src', `${i}.ans`],
+                '@user': ['run', `${i}.ans`],
             }
             pipeline.push(cmp)
         }
