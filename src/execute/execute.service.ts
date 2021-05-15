@@ -92,8 +92,8 @@ export class ExecuteService implements OnModuleInit {
             }
             await this.callAgent(i, srcPath, runPath, uid, e, results)
         }
-        // await remove(srcPath)
-        // await remove(runPath)
+        await remove(srcPath)
+        await remove(runPath)
         return results
     }
 
@@ -119,8 +119,6 @@ export class ExecuteService implements OnModuleInit {
 
         const ret = await got(url, { throwHttpErrors: false })
 
-        console.log({ code: ret.statusCode, body: ret.body })
-
         if (ret.statusCode === 200) {
             const agentRet = ret.body
             results[index] = AgentResult.fromStr(agentRet)
@@ -133,7 +131,6 @@ export class ExecuteService implements OnModuleInit {
             // system error
             const agentRet = ret.body
             results[index] = AgentResult.fromErr(agentRet)
-
         } else {
             results[index] = AgentResult.fromErr('500')
         }

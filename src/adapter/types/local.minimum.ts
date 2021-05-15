@@ -107,7 +107,6 @@ export class HoroscopeAgentCall extends HoroscopeAgentCallTemplate {
             }
         }
 
-
         const rec = containers[container_name]
         const port = rec && rec[1]
         if (!port) throw new Error('container not found')

@@ -99,7 +99,7 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
 
         const cases = parseInt(submission.cases, 10)
         const timeLimit = parseInt(submission.timeLimit, 10)
-        const memoryLimit = Math.max(1 << 30, parseInt(submission.memoryLimit, 10)) // minminal 1GiB
+        const memoryLimit = Math.max(1024, parseInt(submission.memoryLimit, 10)) // minminal 1GiB
 
         const minimum = new LocalMinimum()
         minimum.id = taskId
@@ -126,6 +126,7 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
             pipeline.push(comp)
             pipeline.push({ empty: true, skip_if_fail: false, break_if_fail: 0 })
         } else {
+            pipeline.push({ empty: true, skip_if_fail: false, break_if_fail: false })
             pipeline.push({ empty: true, skip_if_fail: false, break_if_fail: false })
         }
 
@@ -224,51 +225,55 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
         }
 
         const promise = new Promise(async (resolve, reject) => {
-                const res = resultSet.results
+                try {
+                    const res = resultSet.results
 
-                const submission = await this.getTaskById(resultSet.minimum.id)
-                const judgeResult: SandboxResult[] = []
-                const timeLimit = parseInt(submission.timeLimit, 10) * 1e9
-                const memoryLimit = parseInt(submission.memoryLimit, 10) * (1 << 20)
-
-
-                if (res.length === 0) {
-                    // SE
-                    submission.status = Status.SE.toString()
-                    resolve(submission)
-                    return
-                }
+                    const submission = await this.getTaskById(resultSet.minimum.id)
+                    const judgeResult: SandboxResult[] = []
+                    const timeLimit = parseInt(submission.timeLimit, 10) * 1e9
+                    const memoryLimit = parseInt(submission.memoryLimit, 10) * (1 << 20)
 
 
-                if (res[0] && !res[0]!.ok) {
-                    // CE
-                    submission.status = Status.CE.toString()
-                    resolve(submission)
-                    return
-                } else {
-                    // No need to compile
-                }
-
-                // er.result or submission.status
-
-                submission.time = submission.memory = 0
-                submission.status = Status.AC.toString()
-
-
-                for (let i = 2; i < res.length; i += 2) {
-                    const run = res[i]
-                    const cmp = res[i + 1]
-                    const r = this.handleSingleRun(run, cmp, timeLimit, memoryLimit)
-                    if (r.result !== Status.AC) {
-                        submission.status = r.result.toString()
+                    if (res.length === 0) {
+                        // SE
+                        submission.status = Status.SE.toString()
+                        resolve(submission)
+                        return
                     }
-                    submission.time += r.cpuTime
-                    submission.memory += r.memory
-                    judgeResult.push(r)
-                }
 
-                submission.judgeResult = JSON.stringify(judgeResult)
-                resolve(submission)
+
+                    if (res[0] && !res[0]!.ok) {
+                        // CE
+                        submission.status = Status.CE.toString()
+                        resolve(submission)
+                        return
+                    } else {
+                        // No need to compile
+                    }
+
+                    // er.result or submission.status
+
+                    submission.time = submission.memory = 0
+                    submission.status = Status.AC.toString()
+
+
+                    for (let i = 2; i < res.length; i += 2) {
+                        const run = res[i]
+                        const cmp = res[i + 1]
+                        const r = this.handleSingleRun(run, cmp, timeLimit, memoryLimit)
+                        if (r.result !== Status.AC) {
+                            submission.status = r.result.toString()
+                        }
+                        submission.time += r.cpuTime
+                        submission.memory += r.memory
+                        judgeResult.push(r)
+                    }
+
+                    submission.judgeResult = JSON.stringify(judgeResult)
+                    resolve(submission)
+                } catch (e) {
+                    reject(e)
+                }
             },
         )
 

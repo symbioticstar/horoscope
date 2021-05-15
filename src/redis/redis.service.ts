@@ -21,7 +21,7 @@ export class RedisService {
                     await client.quit()
                 },
             },
-            { max: 16, min: 4 },
+            { max: 16, min: 4},
         )
     }
 
