@@ -1,6 +1,11 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { Adapter } from '../adapter'
-import { HoroscopeAgentCallable, HoroscopeAgentCallTemplate, LocalMinimum } from '../types/local.minimum'
+import {
+    HoroscopeAgentCall,
+    HoroscopeAgentCallable,
+    HoroscopeAgentCallTemplate,
+    LocalMinimum,
+} from '../types/local.minimum'
 import { AgentResult, AgentResultOptional, AgentResultSet, Comparison } from '../types/agent-result'
 import { RedisService } from '../../redis/redis.service'
 import IORedis, { Redis } from 'ioredis'
@@ -174,19 +179,21 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
             r.result = Status.SE
             return r
         }
+
+
+        if (timeLimit < (run.cpu_user + run.cpu_sys)) {
+            // TLE
+            r.result = Status.TLE
+            return r
+        }
+
+        if (memoryLimit < run.memory) {
+            // MLE
+            r.result = Status.MLE
+            return r
+        }
+
         if (!run.ok) {
-            if (timeLimit < (run.cpu_user + run.cpu_sys)) {
-                // TLE
-                r.result = Status.TLE
-                return r
-            }
-
-            if (memoryLimit < run.memory) {
-                // MLE
-                r.result = Status.MLE
-                return r
-            }
-
             r.result = Status.RE
             return r
         } else {

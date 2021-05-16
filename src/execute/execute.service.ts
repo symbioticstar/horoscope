@@ -63,8 +63,9 @@ export class ExecuteService implements OnModuleInit {
 
     async handleMinimum(minimum: LocalMinimum, uid: number) {
         const id = minimum.id
-        const srcPath = path.join(this.srcDir, id)
-        const runPath = path.join(this.runDir, id)
+        const idFixed = `${id}_${uid.toString()}`
+        const srcPath = path.join(this.srcDir, idFixed)
+        const runPath = path.join(this.runDir, idFixed)
         // parent dir must created before
         await remove(srcPath)
         await remove(runPath)
@@ -92,8 +93,8 @@ export class ExecuteService implements OnModuleInit {
             }
             await this.callAgent(i, srcPath, runPath, uid, e, results)
         }
-        await remove(srcPath)
-        await remove(runPath)
+        // await remove(srcPath)
+        // await remove(runPath)
         return results
     }
 
@@ -118,6 +119,8 @@ export class ExecuteService implements OnModuleInit {
         console.log(url)
 
         const ret = await got(url, { throwHttpErrors: false })
+
+        console.log({ url, ret: ret.body })
 
         if (ret.statusCode === 200) {
             const agentRet = ret.body
