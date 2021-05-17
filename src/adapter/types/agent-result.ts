@@ -6,6 +6,7 @@ export class AgentResult {
     signal: number = 0
     cpu_sys: number = 0
     cpu_user: number = 0
+    real_time: number = 0
     memory: number = 0
 
     get ok() {
@@ -14,13 +15,14 @@ export class AgentResult {
 
     static fromStr(str: string) {
         const r = str.trim().split(' ').map(e => parseInt(e))
-        if (r.length != 5) throw new Error('bad input')
+        if (r.length != 6) throw new Error('bad input')
         const ret = new AgentResult()
         ret.status = r[0]!
         ret.signal = r[1]!
         ret.cpu_sys = r[2]!
         ret.cpu_user = r[3]!
-        ret.memory = r[4]!
+        ret.real_time = r[4]!
+        ret.memory = r[5]!
         return ret
     }
 

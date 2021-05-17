@@ -9,7 +9,8 @@ function st() {
     --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \
     --cap-add ALL \
     -p $1:9000 \
-    -td --restart unless-stopped $2 sh -c 'horoscope_fair 9000 /usr/bin/horoscope_lantern'
+    -u 0:0 \
+    -td --restart unless-stopped --entrypoint='' $2 sh -c 'horoscope_fair 9000 /usr/bin/horoscope_lantern'
     # must use sh -c '...', must not run binary directly
 }
 
@@ -27,3 +28,10 @@ st 8001 python
 st 8002 openjdk:11
 st 8003 rust
 st 8004 registry.cn-hangzhou.aliyuncs.com/kazune/ojcmp:1.1
+st 8005 golang
+st 8006 ruby
+st 8007 node
+st 8010 perl
+st 8012 erlang
+st 8013 haskell
+st 8015 swift

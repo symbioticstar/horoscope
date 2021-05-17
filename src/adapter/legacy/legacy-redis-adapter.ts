@@ -1,11 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { Adapter } from '../adapter'
-import {
-    HoroscopeAgentCall,
-    HoroscopeAgentCallable,
-    HoroscopeAgentCallTemplate,
-    LocalMinimum,
-} from '../types/local.minimum'
+import { HoroscopeAgentCallable, HoroscopeAgentCallTemplate, LocalMinimum } from '../types/local.minimum'
 import { AgentResult, AgentResultOptional, AgentResultSet, Comparison } from '../types/agent-result'
 import { RedisService } from '../../redis/redis.service'
 import IORedis, { Redis } from 'ioredis'
@@ -174,6 +169,7 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
         }
         const r = SandboxResult.fromAgentResult(run)
         r.result = Status.AC
+        r['cgEnabled'] = 1
         if (run.hsc_err) {
             r.mainExitCode = run.hsc_err
             r.result = Status.SE
@@ -181,9 +177,15 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
         }
 
 
-        if (timeLimit < (run.cpu_user + run.cpu_sys)) {
+        if (timeLimit < r.cpuTime) {
             // TLE
             r.result = Status.TLE
+            return r
+        }
+
+        if (timeLimit < r.realTime) {
+            // TLE
+            r.result = Status.WTLE
             return r
         }
 
@@ -237,9 +239,10 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
 
                     const submission = await this.getTaskById(resultSet.minimum.id)
                     const judgeResult: SandboxResult[] = []
-                    const timeLimit = parseInt(submission.timeLimit, 10) * 1e9
+                    const timeLimit = parseInt(submission.timeLimit, 10) * 1e3 // ms
                     const memoryLimit = parseInt(submission.memoryLimit, 10) * (1 << 20)
 
+                    submission.status = Status.AC.toString()
 
                     if (res.length === 0) {
                         // SE
@@ -325,6 +328,8 @@ export enum Status {
     JUDGING,
     COMPILING,
     OLE,
+    SC,
+    WTLE
 }
 
 export class RawTask {
@@ -399,14 +404,15 @@ export class SandboxResult {
 
     static fromAgentResult(m: AgentResult) {
         const r = new SandboxResult()
-        r.cpuTime = Math.round((m.cpu_sys + m.cpu_user) / 1e6)
+        r.cpuTime = Math.floor((m.cpu_sys + m.cpu_user) / 1e6)
         // r.sysTime = Math.round((m.cpu_sys) / 1e6)
         // r.userTime = Math.round((m.cpu_user) / 1e6)
         // r.realTime = ?
+        r.realTime = Math.floor(m.real_time / 1e6)
         r.exitCode = m.status
         r.signal = m.signal
         r.status = m.status
-        r.memory = Math.round(m.memory / (1 << 10))
+        r.memory = Math.floor(m.memory / (1 << 10))
         return r
     }
 }
@@ -426,4 +432,6 @@ export const StatusString = [
     'Judging',
     'Compiling',
     'Output Limit Exceeded',
+    'Similar Code',
+    'Wall Time Limit Exceeded',
 ]
