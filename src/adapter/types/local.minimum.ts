@@ -15,7 +15,8 @@ export type HoroscopeAgentCallable = {
     skip_if_fail: number | false
     break_if_fail: number | false
     trusted: boolean
-
+    uid: number
+    collect: string
     make_url(containers: ImageRecord, uid: number, gid: number, src: string, res: string, run: string): string
 } | {
     empty: true
@@ -75,6 +76,9 @@ export class HoroscopeAgentCall extends HoroscopeAgentCallTemplate {
     break_if_fail: number | false
     skip_if_fail: number | false
     empty: boolean
+
+    uid: number
+    collect: string
 
 
     make_url(containers: ImageRecord, uid: number, gid: number, src: string, res: string, run: string): string {

@@ -5,14 +5,16 @@ export class LanguageDef {
     suffix: string
     compileArgs: string | null
     runArgs: string
+    trustedCompile: boolean
 
-    constructor(compileEnv: string | null, runEnv: string, srcName: string, suffix: string, compileArgs: ((srcName, suffix) => string) | null, runArgs: (srcName, suffix) => string) {
+    constructor(compileEnv: string | null, runEnv: string, srcName: string, suffix: string, compileArgs: ((srcName, suffix) => string) | null, runArgs: (srcName, suffix) => string, trustedCompile = false) {
         this.compileEnv = compileEnv
         this.runEnv = runEnv
         this.srcName = srcName
         this.suffix = suffix
         this.compileArgs = compileArgs && compileArgs(srcName, suffix)
         this.runArgs = runArgs(srcName, suffix)
+        this.trustedCompile = trustedCompile
     }
 
 }

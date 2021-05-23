@@ -93,8 +93,8 @@ export class ExecuteService implements OnModuleInit {
             }
             await this.callAgent(i, srcPath, runPath, uid, e, results)
         }
-        await remove(srcPath)
-        await remove(runPath)
+        // await remove(srcPath)
+        // await remove(runPath)
         return results
     }
 
@@ -115,6 +115,7 @@ export class ExecuteService implements OnModuleInit {
         if (callable.empty) return
 
         let u = callable.trusted ? 0 : uid
+
         const url = HoroscopeAgentCall.prototype.make_url.call(callable, images, u, u, srcPath, this.resDir, runPath)
         console.log(url)
 

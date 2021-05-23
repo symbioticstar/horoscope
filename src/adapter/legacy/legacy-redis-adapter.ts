@@ -148,6 +148,7 @@ export class LegacyRedisAdapter implements Adapter, OnModuleInit {
                 '@standard': ['res', output],
                 '@user': ['run', `${i}.ans`],
             }
+            cmp.trusted = true
             pipeline.push(cmp)
         }
 
