@@ -5,12 +5,12 @@ function st() {
     --mount type=bind,source=/data/horoscope_lantern,target=/usr/bin/horoscope_lantern \
     -v /hs/src:/hs/src \
     -v /hs/run:/hs/run \
-    --mount type=bind,source=/root/st/oj,target=/root/st/oj \
+    --mount type=bind,source=/root/st/oj,target=/hs/st/oj \
     --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup \
     --cap-add ALL \
     -p $1:9000 \
     -u 0:0 \
-    -td --restart unless-stopped --entrypoint='' $2 sh -c 'horoscope_fair 9000 /usr/bin/horoscope_lantern'
+    -td --restart unless-stopped --entrypoint='' $2 sh -c 'chmod -R 777 /root; horoscope_fair 9000 /usr/bin/horoscope_lantern'
     # must use sh -c '...', must not run binary directly
 }
 
